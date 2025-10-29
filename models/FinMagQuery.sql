@@ -2,16 +2,16 @@
 
 CREATE TABLE Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    name NVARCHAR(100) NOT NULL,
+    email NVARCHAR(100) UNIQUE NOT NULL,
+    password_hash NVARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT GETDATE()
 );
 
 CREATE TABLE Categories (
 	category_id INT IDENTITY(1,1) PRIMARY KEY,
-	name VARCHAR(100) NOT NULL,
-	type VARCHAR(40) NOT NULL CHECK (type IN ('income','expense')),
+	name NVARCHAR(100) NOT NULL,
+	type NVARCHAR(40) NOT NULL CHECK (type IN ('income','expense')),
 	user_id INT NOT NULL,
 	FOREIGN KEY (user_id) REFERENCES Users(user_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
@@ -22,9 +22,9 @@ CREATE TABLE  Transactions (
 	user_id INT NOT NULL,
 	category_id INT NOT NULL,
 	amount DECIMAL(15,2) CHECK (amount >=0),
-	note VARCHAR(MAX),
+	note NVARCHAR(MAX),
 	[date] DATE NOT NULL ,
-	type VARCHAR(40) CHECK(type IN ('income','expense')),
+	type NVARCHAR(40) CHECK(type IN ('income','expense')),
 	FOREIGN KEY (user_id) REFERENCES Users(user_id),
 	FOREIGN KEY (category_id) REFERENCES Categories(category_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
@@ -46,7 +46,7 @@ CREATE TABLE Budgets(
 CREATE TABLE Goals(
 	goal_id INT IDENTITY(1,1) PRIMARY KEY,
 	user_id INT NOT NULL,
-	name VARCHAR(100) NOT NULL,
+	name NVARCHAR(100) NOT NULL,
 	target_amount DECIMAL(15,2) CHECK (target_amount >=0),
 	current_amount DECIMAL(15,2) DEFAULT 0,
 	deadline DATE NOT NULL,

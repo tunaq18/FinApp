@@ -1,3 +1,4 @@
+
 1.Tạo database FinManage trong SQL Server và chạy models/sql_schema.sql.
 
 2.Tạo file .env theo .env.example.
