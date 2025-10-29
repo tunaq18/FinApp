@@ -1,5 +1,5 @@
 
-1.Tạo database FinManage trong SQL Server và chạy models/FinMagQuery.
+1.Tạo database FinManage trong SQL Server và chạy models/FinMagQuery.sql
 
 2.Chạy:
 
