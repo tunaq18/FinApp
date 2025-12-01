@@ -11,7 +11,7 @@ CREATE TABLE Users (
 CREATE TABLE Categories (
 	category_id INT IDENTITY(1,1) PRIMARY KEY,
 	name NVARCHAR(100) NOT NULL,
-	type NVARCHAR(40) NOT NULL CHECK (type IN ('income','expense')),
+	type NVARCHAR(40) NOT NULL CHECK (type IN ('Income','Expense')),
 	user_id INT NOT NULL,
 	FOREIGN KEY (user_id) REFERENCES Users(user_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
@@ -24,7 +24,7 @@ CREATE TABLE  Transactions (
 	amount DECIMAL(15,2) CHECK (amount >=0),
 	note NVARCHAR(MAX),
 	[date] DATE NOT NULL ,
-	type NVARCHAR(40) CHECK(type IN ('income','expense')),
+	type NVARCHAR(40) CHECK(type IN ('Income','Expense')),
 	FOREIGN KEY (user_id) REFERENCES Users(user_id),
 	FOREIGN KEY (category_id) REFERENCES Categories(category_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
@@ -53,3 +53,10 @@ CREATE TABLE Goals(
 	FOREIGN KEY (user_id) REFERENCES Users(user_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
+DROP TABLE Goals;
+DROP TABLE Budgets;
+DROP TABLE Transactions;
+DROP TABLE Categories;
+DROP TABLE Users;
