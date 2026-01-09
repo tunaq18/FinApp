@@ -1,0 +1,225 @@
+import 'package:flutter/material.dart';
+import '../models/transaction.dart';
+
+class AddTransactionPage extends StatefulWidget {
+  final Function(Transaction) onAddTransaction;
+
+  AddTransactionPage({required this.onAddTransaction});
+
+  @override
+  _AddTransactionPageState createState() => _AddTransactionPageState();
+}
+
+class _AddTransactionPageState extends State<AddTransactionPage> {
+  final _titleController = TextEditingController();
+  final _amountController = TextEditingController();
+  String _selectedCategory = 'Ăn uống';
+  bool _isIncome = false;
+  DateTime _selectedDate = DateTime.now();
+
+  final List<String> _categories = [
+    'Ăn uống',
+    'Di chuyển',
+    'Mua sắm',
+    'Hóa đơn',
+    'Giải trí',
+    'Sức khỏe',
+    'Giáo dục',
+    'Lương',
+    'Khác',
+  ];
+
+  void _submitData() {
+    if (_titleController.text.isEmpty || _amountController.text.isEmpty) {
+      return;
+    }
+
+    final transaction = Transaction(
+      id: DateTime.now().toString(),
+      title: _titleController.text,
+      amount: double.parse(_amountController.text),
+      date: _selectedDate,
+      category: _selectedCategory,
+      isIncome: _isIncome,
+    );
+
+    widget.onAddTransaction(transaction);
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Thêm giao dịch', style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF0F3460),
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      backgroundColor: Color(0xFF1A1A2E),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _titleController,
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Tiêu đề',
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFE94560)),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _amountController,
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Số tiền',
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFE94560)),
+                ),
+                suffixText: 'đ',
+                suffixStyle: TextStyle(color: Colors.grey),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              dropdownColor: Color(0xFF16213E),
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Danh mục',
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFE94560)),
+                ),
+              ),
+              items: _categories.map((category) {
+                return DropdownMenuItem(
+                  value: category,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Transaction.getCategoryIcon(category),
+                        color: Transaction.getCategoryColor(category),
+                        size: 20,
+                      ),
+                      SizedBox(width: 12),
+                      Text(category),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedCategory = value!;
+                });
+              },
+            ),
+            SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: Color(0xFF16213E),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: SwitchListTile(
+                title: Text(
+                  'Loại giao dịch',
+                  style: TextStyle(color: Colors.white),
+                ),
+                subtitle: Text(
+                  _isIncome ? 'Thu nhập' : 'Chi tiêu',
+                  style: TextStyle(color: Colors.grey),
+                ),
+                value: _isIncome,
+                onChanged: (value) {
+                  setState(() {
+                    _isIncome = value;
+                  });
+                },
+                activeColor: Colors.green,
+              ),
+            ),
+            SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: Color(0xFF16213E),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ListTile(
+                title: Text('Ngày', style: TextStyle(color: Colors.white)),
+                subtitle: Text(
+                  '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                  style: TextStyle(color: Colors.grey),
+                ),
+                trailing: Icon(Icons.calendar_today, color: Color(0xFFE94560)),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now(),
+                    builder: (context, child) {
+                      return Theme(
+                        data: ThemeData.dark().copyWith(
+                          colorScheme: ColorScheme.dark(
+                            primary: Color(0xFFE94560),
+                            surface: Color(0xFF16213E),
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _selectedDate = picked;
+                    });
+                  }
+                },
+              ),
+            ),
+            SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _submitData,
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Text('Thêm giao dịch', style: TextStyle(fontSize: 18)),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFE94560),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
