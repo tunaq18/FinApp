@@ -82,7 +82,11 @@ class _MainScreenState extends State<MainScreen> {
         onTap: (index) {
           if (index != 2) {
             setState(() {
-              _selectedIndex = index;
+              if (index > 2) {
+                _selectedIndex = index - 1;
+              } else {
+                _selectedIndex = index;
+              }
             });
           }
         },
@@ -109,7 +113,7 @@ class _MainScreenState extends State<MainScreen> {
           );
         },
         child: Icon(Icons.add, size: 30),
-        backgroundColor: Color(0xFFE94560),
+        backgroundColor: Color.fromARGB(255, 102, 224, 66),
         elevation: 8,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

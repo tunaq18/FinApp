@@ -5,10 +5,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Cá nhân', style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF0F3460),
-      ),
+      appBar: AppBar(backgroundColor: Color(0xFF1A1A2E)),
       backgroundColor: Color(0xFF1A1A2E),
       body: ListView(
         padding: EdgeInsets.all(16),

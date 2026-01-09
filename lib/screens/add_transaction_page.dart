@@ -210,7 +210,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 child: Text('Thêm giao dịch', style: TextStyle(fontSize: 18)),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE94560),
+                backgroundColor: Color.fromARGB(255, 53, 234, 93),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),

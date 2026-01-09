@@ -31,7 +31,7 @@ class BalanceCard extends StatelessWidget {
           Text(
             Transaction.formatCurrency(amount),
             style: TextStyle(
-              color: Colors.white,
+              color: color,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
