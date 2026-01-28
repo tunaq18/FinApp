@@ -78,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
+        currentIndex: _selectedIndex > 1 ? _selectedIndex + 1 : _selectedIndex,
         onTap: (index) {
           if (index != 2) {
             setState(() {

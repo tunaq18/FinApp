@@ -1,6 +1,8 @@
+// lib/screens/statistics_page.dart
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import '../widgets/category_expense_card.dart';
+import 'dart:math' as math;
 
 class StatisticsPage extends StatelessWidget {
   final List<Transaction> transactions;
@@ -65,8 +67,74 @@ class StatisticsPage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 20),
+                  // Biểu đồ tròn custom
+                  Card(
+                    color: Color(0xFF16213E),
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Biểu đồ chi tiêu',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          CustomPieChart(expenses: expenses, total: total),
+                          SizedBox(height: 20),
+                          // Legend
+                          Wrap(
+                            spacing: 16,
+                            runSpacing: 12,
+                            alignment: WrapAlignment.center,
+                            children: expenses.entries.map((entry) {
+                              final percentage = (entry.value / total * 100);
+                              return Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black26,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: Transaction.getCategoryColor(
+                                          entry.key,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '${entry.key} (${percentage.toStringAsFixed(1)}%)',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
                   Text(
-                    'Chi tiêu theo danh mục',
+                    'Chi tiết theo danh mục',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -86,4 +154,120 @@ class StatisticsPage extends StatelessWidget {
             ),
     );
   }
+}
+
+// Custom Pie Chart Widget
+class CustomPieChart extends StatelessWidget {
+  final Map<String, double> expenses;
+  final double total;
+
+  CustomPieChart({required this.expenses, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 280,
+      child: Center(
+        child: CustomPaint(
+          size: Size(240, 240),
+          painter: PieChartPainter(expenses: expenses, total: total),
+        ),
+      ),
+    );
+  }
+}
+
+class PieChartPainter extends CustomPainter {
+  final Map<String, double> expenses;
+  final double total;
+
+  PieChartPainter({required this.expenses, required this.total});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2;
+    final innerRadius = radius * 0.55; // Tạo hình donut
+
+    double startAngle = -math.pi / 2; // Bắt đầu từ 12 giờ
+
+    expenses.forEach((category, amount) {
+      final sweepAngle = (amount / total) * 2 * math.pi;
+      final color = Transaction.getCategoryColor(category);
+
+      // Vẽ phần outer
+      final paint = Paint()
+        ..color = color
+        ..style = PaintingStyle.fill;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle,
+        true,
+        paint,
+      );
+
+      // Vẽ text phần trăm
+      final percentage = (amount / total * 100);
+      if (percentage > 5) {
+        // Chỉ hiển thị nếu > 5%
+        final middleAngle = startAngle + sweepAngle / 2;
+        final textRadius = radius * 0.75;
+        final textX = center.dx + textRadius * math.cos(middleAngle);
+        final textY = center.dy + textRadius * math.sin(middleAngle);
+
+        final textPainter = TextPainter(
+          text: TextSpan(
+            text: '${percentage.toStringAsFixed(1)}%',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              shadows: [
+                Shadow(
+                  offset: Offset(1, 1),
+                  blurRadius: 3,
+                  color: Colors.black54,
+                ),
+              ],
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        );
+
+        textPainter.layout();
+        textPainter.paint(
+          canvas,
+          Offset(textX - textPainter.width / 2, textY - textPainter.height / 2),
+        );
+      }
+
+      startAngle += sweepAngle;
+    });
+
+    // Vẽ phần inner (tạo donut hole)
+    final innerPaint = Paint()
+      ..color = Color(0xFF16213E)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(center, innerRadius, innerPaint);
+
+    // Vẽ icon ở giữa
+    final iconPainter = TextPainter(
+      text: TextSpan(text: '💰', style: TextStyle(fontSize: 40)),
+      textDirection: TextDirection.ltr,
+    );
+    iconPainter.layout();
+    iconPainter.paint(
+      canvas,
+      Offset(
+        center.dx - iconPainter.width / 2,
+        center.dy - iconPainter.height / 2,
+      ),
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
