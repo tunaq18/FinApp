@@ -1,29 +1,45 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const app = express();
-const port = process.env.PORT || 3000;
-
+const dotenv = require("dotenv");
+const { connectDB, closeDB } = require("./config/database");
 const userRoutes = require("./routes/userRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
-const budgetRoutes = require("./routes/budgetRoutes");
+const statisticsRoutes = require("./routes/statisticsRoutes");
 
+dotenv.config();
+
+const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/users", userRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/transactions", transactionRoutes);
-app.use("/api/budgets", budgetRoutes);
+// Connect to database
+connectDB();
 
-app.get("/", (req, res) => res.send("FinManage API running"));
-
-app.all("*", (req, res) => {
-  //Catch unknow url
-  res.status(404).send("404 NOT FOUND!");
+// Routes
+app.get("/api/health", (req, res) => {
+  res.json({ status: "OK", message: "Server đang chạy" });
 });
 
-app.listen(port, () =>
-  console.log(`Server running on http://localhost:${port}`)
-);
+app.use("/api/users", userRoutes);
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/statistics", statisticsRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Đã xảy ra lỗi server" });
+});
+
+// Graceful shutdown
+process.on("SIGINT", async () => {
+  await closeDB();
+  process.exit(0);
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

@@ -1,89 +1,73 @@
-const { sql, config } = require("../config/db");
+const Transaction = require("../models/Transaction");
 
 exports.getAll = async (req, res) => {
-  //get all transaction
-  const user_id = req.user.user_id;
   try {
-    const pool = await sql.connect(config);
-    const q = await pool.request().input("uid", sql.Int, user_id)
-      .query(`SELECT t.transaction_id, t.[date], t.amount, t.note, t.type, c.name AS category_name
-              FROM Transactions t LEFT JOIN Categories c ON t.category_id = c.category_id
-              WHERE t.user_id = @uid ORDER BY t.[date] DESC`);
-    res.json(q.recordset);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Lỗi server" });
+    const transactions = await Transaction.findByUserId(
+      req.params.userId,
+      req.query,
+    );
+    res.json(transactions);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.getOne = async (req, res) => {
+  try {
+    const transaction = await Transaction.findById(
+      req.params.transactionId,
+      req.params.userId,
+    );
+    if (!transaction) {
+      return res.status(404).json({ error: "Không tìm thấy giao dịch" });
+    }
+    res.json(transaction);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: error.message });
   }
 };
 
 exports.create = async (req, res) => {
-  //Create a transaction
-  const user_id = req.user.user_id;
-  const { category_id, amount, note, date, type } = req.body;
-  if (!amount || !date || !type)
-    return res.status(400).json({ message: "Thiếu dữ liệu" });
   try {
-    const pool = await sql.connect(config);
-    const r = await pool
-      .request()
-      .input("uid", sql.Int, user_id)
-      .input("cid", sql.Int, category_id || null)
-      .input("amount", sql.Decimal(18, 2), amount)
-      .input("note", sql.NVarChar, note)
-      .input("date", sql.Date, date)
-      .input("type", sql.NVarChar, type)
-      .query(
-        "INSERT INTO Transactions (user_id, category_id, amount, note, [date], type) VALUES (@uid,@cid,@amount,@note,@date,@type); SELECT SCOPE_IDENTITY() AS id;"
-      );
-    res.json({ message: "Đã thêm giao dịch", id: r.recordset[0].id });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Lỗi server" });
+    const transaction = await Transaction.create(req.params.userId, req.body);
+    res.status(201).json(transaction);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: error.message });
   }
 };
 
 exports.update = async (req, res) => {
-  //Update transaction
-  const user_id = req.user.user_id;
-  const { id } = req.params;
-  const { category_id, amount, note, date, type } = req.body;
   try {
-    const pool = await sql.connect(config);
-    await pool
-      .request()
-      .input("cid", sql.Int, category_id || null)
-      .input("amount", sql.Decimal(18, 2), amount)
-      .input("note", sql.NVarChar, note)
-      .input("date", sql.Date, date)
-      .input("type", sql.NVarChar, type)
-      .input("id", sql.Int, id)
-      .input("uid", sql.Int, user_id)
-      .query(
-        "UPDATE Transactions SET category_id=@cid, amount=@amount, note=@note, [date]=@date, type=@type WHERE transaction_id=@id AND user_id=@uid"
-      );
-    res.json({ message: "Đã cập nhật" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Lỗi server" });
+    const transaction = await Transaction.update(
+      req.params.transactionId,
+      req.params.userId,
+      req.body,
+    );
+    if (!transaction) {
+      return res.status(404).json({ error: "Không tìm thấy giao dịch" });
+    }
+    res.json(transaction);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: error.message });
   }
 };
 
-exports.remove = async (req, res) => {
-  //Delete Transaction
-  const user_id = req.user.user_id;
-  const { id } = req.params;
+exports.delete = async (req, res) => {
   try {
-    const pool = await sql.connect(config);
-    await pool
-      .request()
-      .input("id", sql.Int, id)
-      .input("uid", sql.Int, user_id)
-      .query(
-        "DELETE FROM Transactions WHERE transaction_id=@id AND user_id=@uid"
-      );
-    res.json({ message: "Đã xóa" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Lỗi server" });
+    const transaction = await Transaction.delete(
+      req.params.transactionId,
+      req.params.userId,
+    );
+    if (!transaction) {
+      return res.status(404).json({ error: "Không tìm thấy giao dịch" });
+    }
+    res.json({ message: "Đã xóa giao dịch thành công", transaction });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: error.message });
   }
 };

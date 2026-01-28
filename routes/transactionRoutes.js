@@ -1,11 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const controller = require('../controllers/transactionController');
-const { authenticate } = require('../utils/auth');
+const transactionController = require("../controllers/transactionController");
 
-router.get('/', authenticate, controller.getAll);
-router.post('/', authenticate, controller.create);
-router.put('/:id', authenticate, controller.update);
-router.delete('/:id', authenticate, controller.remove);
+router.get("/:userId", transactionController.getAll);
+router.get("/:userId/:transactionId", transactionController.getOne);
+router.post("/:userId", transactionController.create);
+router.put("/:userId/:transactionId", transactionController.update);
+router.delete("/:userId/:transactionId", transactionController.delete);
 
 module.exports = router;
