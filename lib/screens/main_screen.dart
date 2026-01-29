@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/transaction.dart';
+import '../models/user_model.dart';
+import '../models/transaction_model.dart';
+import '../services/transaction_service.dart';
 import 'home_page.dart';
 import 'transactions_page.dart';
 import 'statistics_page.dart';
@@ -7,57 +9,69 @@ import 'profile_page.dart';
 import 'add_transaction_page.dart';
 
 class MainScreen extends StatefulWidget {
+  final UserModel user;
+
+  MainScreen({required this.user});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  List<Transaction> transactions = [
-    Transaction(
-      id: '1',
-      title: 'Lương tháng 1',
-      amount: 15000000,
-      date: DateTime.now().subtract(Duration(days: 5)),
-      category: 'Lương',
-      isIncome: true,
-    ),
-    Transaction(
-      id: '2',
-      title: 'Tiền điện',
-      amount: 500000,
-      date: DateTime.now().subtract(Duration(days: 3)),
-      category: 'Hóa đơn',
-      isIncome: false,
-    ),
-    Transaction(
-      id: '3',
-      title: 'Ăn uống',
-      amount: 200000,
-      date: DateTime.now().subtract(Duration(days: 1)),
-      category: 'Ăn uống',
-      isIncome: false,
-    ),
-    Transaction(
-      id: '4',
-      title: 'Xăng xe',
-      amount: 300000,
-      date: DateTime.now(),
-      category: 'Di chuyển',
-      isIncome: false,
-    ),
-  ];
+  List<TransactionModel> transactions = [];
+  bool _isLoading = true;
 
-  void _addTransaction(Transaction transaction) {
-    setState(() {
-      transactions.insert(0, transaction);
-    });
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
   }
 
-  void _deleteTransaction(String id) {
-    setState(() {
-      transactions.removeWhere((transaction) => transaction.id == id);
-    });
+  Future<void> _loadTransactions() async {
+    try {
+      setState(() => _isLoading = true);
+      final data = await TransactionService.getTransactions(widget.user.id);
+      setState(() {
+        transactions = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi tải dữ liệu: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteTransaction(int transactionId) async {
+    try {
+      await TransactionService.deleteTransaction(widget.user.id, transactionId);
+      await _loadTransactions();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã xóa giao dịch'),
+            backgroundColor: Color(0xFF16213E),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi xóa giao dịch: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -66,13 +80,21 @@ class _MainScreenState extends State<MainScreen> {
       HomePage(
         transactions: transactions,
         onDeleteTransaction: _deleteTransaction,
+        isLoading: _isLoading,
+        onRefresh: _loadTransactions,
       ),
       TransactionsPage(
         transactions: transactions,
         onDeleteTransaction: _deleteTransaction,
+        isLoading: _isLoading,
+        onRefresh: _loadTransactions,
       ),
-      StatisticsPage(transactions: transactions),
-      ProfilePage(),
+      StatisticsPage(
+        transactions: transactions,
+        isLoading: _isLoading,
+        userId: widget.user.id,
+      ),
+      ProfilePage(user: widget.user),
     ];
 
     return Scaffold(
@@ -103,17 +125,19 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  AddTransactionPage(onAddTransaction: _addTransaction),
+              builder: (context) => AddTransactionPage(userId: widget.user.id),
             ),
           );
+          if (result == true) {
+            await _loadTransactions();
+          }
         },
         child: Icon(Icons.add, size: 30),
-        backgroundColor: Color.fromARGB(255, 102, 224, 66),
+        backgroundColor: Color.fromARGB(255, 71, 238, 127),
         elevation: 8,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

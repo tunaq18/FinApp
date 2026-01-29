@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/main_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   runApp(MyFinanceApp());
@@ -24,7 +24,7 @@ class MyFinanceApp extends StatelessWidget {
           unselectedItemColor: Colors.grey[600],
         ),
       ),
-      home: MainScreen(),
+      home: SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

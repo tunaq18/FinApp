@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/transaction.dart';
+import '../models/transaction_model.dart';
+import '../services/transaction_service.dart';
 
 class AddTransactionPage extends StatefulWidget {
-  final Function(Transaction) onAddTransaction;
+  final int userId;
 
-  AddTransactionPage({required this.onAddTransaction});
+  AddTransactionPage({required this.userId});
 
   @override
   _AddTransactionPageState createState() => _AddTransactionPageState();
@@ -16,6 +17,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   String _selectedCategory = 'Ăn uống';
   bool _isIncome = false;
   DateTime _selectedDate = DateTime.now();
+  bool _isLoading = false;
 
   final List<String> _categories = [
     'Ăn uống',
@@ -29,22 +31,43 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     'Khác',
   ];
 
-  void _submitData() {
+  Future<void> _submitData() async {
     if (_titleController.text.isEmpty || _amountController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Vui lòng nhập đầy đủ thông tin'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
-    final transaction = Transaction(
-      id: DateTime.now().toString(),
-      title: _titleController.text,
-      amount: double.parse(_amountController.text),
-      date: _selectedDate,
-      category: _selectedCategory,
-      isIncome: _isIncome,
-    );
+    setState(() => _isLoading = true);
 
-    widget.onAddTransaction(transaction);
-    Navigator.pop(context);
+    try {
+      final transaction = TransactionModel(
+        userId: widget.userId,
+        title: _titleController.text,
+        amount: double.parse(_amountController.text),
+        date: _selectedDate,
+        category: _selectedCategory,
+        isIncome: _isIncome,
+      );
+
+      await TransactionService.createTransaction(widget.userId, transaction);
+
+      if (mounted) {
+        Navigator.pop(context, true); // true = success
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi thêm giao dịch: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -118,20 +141,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
               ),
               items: _categories.map((category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Transaction.getCategoryIcon(category),
-                        color: Transaction.getCategoryColor(category),
-                        size: 20,
-                      ),
-                      SizedBox(width: 12),
-                      Text(category),
-                    ],
-                  ),
-                );
+                return DropdownMenuItem(value: category, child: Text(category));
               }).toList(),
               onChanged: (value) {
                 setState(() {
@@ -204,13 +214,24 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             ),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _submitData,
+              onPressed: _isLoading ? null : _submitData,
               child: Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('Thêm giao dịch', style: TextStyle(fontSize: 18)),
+                child: _isLoading
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                    : Text('Thêm giao dịch', style: TextStyle(fontSize: 18)),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 53, 234, 93),
+                backgroundColor: Color(0xFFE94560),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),

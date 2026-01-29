@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/transaction.dart';
+import '../models/transaction_model.dart';
 
 class CategoryExpenseCard extends StatelessWidget {
   final String category;
@@ -15,7 +15,7 @@ class CategoryExpenseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final percentage = (amount / total * 100);
-    final categoryColor = Transaction.getCategoryColor(category);
+    final categoryColor = TransactionModel.getCategoryColor(category);
 
     return Card(
       margin: EdgeInsets.only(bottom: 10),
@@ -37,7 +37,7 @@ class CategoryExpenseCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        Transaction.getCategoryIcon(category),
+                        TransactionModel.getCategoryIcon(category),
                         color: categoryColor,
                         size: 20,
                       ),
@@ -54,7 +54,7 @@ class CategoryExpenseCard extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  Transaction.formatCurrency(amount),
+                  TransactionModel.formatCurrency(amount),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

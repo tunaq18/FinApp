@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/transaction.dart';
+import '../models/transaction_model.dart';
 
 class BalanceCard extends StatelessWidget {
   final String title;
@@ -29,7 +29,7 @@ class BalanceCard extends StatelessWidget {
           Text(title, style: TextStyle(color: Colors.white70, fontSize: 14)),
           SizedBox(height: 5),
           Text(
-            Transaction.formatCurrency(amount),
+            TransactionModel.formatCurrency(amount),
             style: TextStyle(
               color: color,
               fontSize: 18,

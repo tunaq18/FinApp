@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'transaction.dart';
+
 class TransactionModel {
   final int? id;
   final int userId;
@@ -39,15 +42,16 @@ class TransactionModel {
     };
   }
 
-  // Convert từ Transaction cũ
-  static TransactionModel fromTransaction(dynamic transaction, int userId) {
-    return TransactionModel(
-      userId: userId,
-      title: transaction.title,
-      amount: transaction.amount,
-      date: transaction.date,
-      category: transaction.category,
-      isIncome: transaction.isIncome,
-    );
+  // Sử dụng các helper methods từ Transaction model cũ
+  static String formatCurrency(double amount) {
+    return Transaction.formatCurrency(amount);
+  }
+
+  static IconData getCategoryIcon(String category) {
+    return Transaction.getCategoryIcon(category);
+  }
+
+  static Color getCategoryColor(String category) {
+    return Transaction.getCategoryColor(category);
   }
 }

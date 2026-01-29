@@ -1,11 +1,61 @@
 import 'package:flutter/material.dart';
+import '../models/user_model.dart';
+import '../utils/user_preferences.dart';
 import '../widgets/profile_menu_item.dart';
+import 'login_screen.dart';
 
 class ProfilePage extends StatelessWidget {
+  final UserModel user;
+
+  ProfilePage({required this.user});
+
+  Future<void> _logout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color(0xFF16213E),
+          title: Text(
+            'Xác nhận đăng xuất',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            'Bạn có chắc muốn đăng xuất?',
+            style: TextStyle(color: Colors.grey[300]),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Hủy', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Đăng xuất', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      await UserPreferences.logout();
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+          (route) => false,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Color(0xFF1A1A2E)),
+      appBar: AppBar(
+        title: Text('Cá nhân', style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF0F3460),
+      ),
       backgroundColor: Color(0xFF1A1A2E),
       body: ListView(
         padding: EdgeInsets.all(16),
@@ -20,7 +70,7 @@ class ProfilePage extends StatelessWidget {
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'Người dùng',
+                  user.name,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -28,7 +78,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8),
-                Text('user@example.com', style: TextStyle(color: Colors.grey)),
+                Text(user.email, style: TextStyle(color: Colors.grey)),
               ],
             ),
           ),
@@ -44,7 +94,7 @@ class ProfilePage extends StatelessWidget {
           ProfileMenuItem(icon: Icons.info, title: 'Về chúng tôi'),
           SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () => _logout(context),
             child: Padding(
               padding: EdgeInsets.all(12),
               child: Text('Đăng xuất'),

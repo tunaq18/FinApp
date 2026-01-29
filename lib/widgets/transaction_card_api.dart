@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import '../models/transaction.dart';
+import '../models/transaction_model.dart';
 
-class TransactionCard extends StatelessWidget {
-  final Transaction transaction;
-  final Function(String) onDelete;
+class TransactionCardApi extends StatelessWidget {
+  final TransactionModel transaction;
+  final Function(int) onDelete;
 
-  TransactionCard({required this.transaction, required this.onDelete});
+  TransactionCardApi({required this.transaction, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: Key(transaction.id),
+      key: Key(transaction.id.toString()),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
@@ -51,16 +51,11 @@ class TransactionCard extends StatelessWidget {
         );
       },
       onDismissed: (direction) {
-        onDelete(transaction.id);
+        onDelete(transaction.id!);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Đã xóa giao dịch'),
             backgroundColor: Color(0xFF16213E),
-            action: SnackBarAction(
-              label: 'OK',
-              textColor: Color(0xFFE94560),
-              onPressed: () {},
-            ),
           ),
         );
       },
@@ -71,16 +66,16 @@ class TransactionCard extends StatelessWidget {
           leading: CircleAvatar(
             backgroundColor: transaction.isIncome
                 ? Colors.green[900]
-                : Transaction.getCategoryColor(
+                : TransactionModel.getCategoryColor(
                     transaction.category,
                   ).withOpacity(0.2),
             child: Icon(
               transaction.isIncome
                   ? Icons.add
-                  : Transaction.getCategoryIcon(transaction.category),
+                  : TransactionModel.getCategoryIcon(transaction.category),
               color: transaction.isIncome
                   ? Colors.green
-                  : Transaction.getCategoryColor(transaction.category),
+                  : TransactionModel.getCategoryColor(transaction.category),
             ),
           ),
           title: Text(transaction.title, style: TextStyle(color: Colors.white)),
@@ -98,7 +93,7 @@ class TransactionCard extends StatelessWidget {
             ],
           ),
           trailing: Text(
-            '${transaction.isIncome ? '+' : '-'}${Transaction.formatCurrency(transaction.amount).replaceAll(' đ', '')} đ',
+            '${transaction.isIncome ? '+' : '-'}${TransactionModel.formatCurrency(transaction.amount).replaceAll(' đ', '')} đ',
             style: TextStyle(
               color: transaction.isIncome ? Colors.green : Color(0xFFE94560),
               fontWeight: FontWeight.bold,

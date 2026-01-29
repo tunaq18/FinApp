@@ -1,13 +1,18 @@
-// lib/screens/statistics_page.dart
 import 'package:flutter/material.dart';
-import '../models/transaction.dart';
+import '../models/transaction_model.dart';
 import '../widgets/category_expense_card.dart';
 import 'dart:math' as math;
 
 class StatisticsPage extends StatelessWidget {
-  final List<Transaction> transactions;
+  final List<TransactionModel> transactions;
+  final bool isLoading;
+  final int userId;
 
-  StatisticsPage({required this.transactions});
+  StatisticsPage({
+    required this.transactions,
+    required this.isLoading,
+    required this.userId,
+  });
 
   Map<String, double> get categoryExpenses {
     Map<String, double> expenses = {};
@@ -31,7 +36,13 @@ class StatisticsPage extends StatelessWidget {
         backgroundColor: Color(0xFF0F3460),
       ),
       backgroundColor: Color(0xFF1A1A2E),
-      body: expenses.isEmpty
+      body: isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE94560)),
+              ),
+            )
+          : expenses.isEmpty
           ? Center(
               child: Text(
                 'Chưa có dữ liệu thống kê',
@@ -55,7 +66,7 @@ class StatisticsPage extends StatelessWidget {
                           ),
                           SizedBox(height: 10),
                           Text(
-                            Transaction.formatCurrency(total),
+                            TransactionModel.formatCurrency(total),
                             style: TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
@@ -67,7 +78,6 @@ class StatisticsPage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 20),
-                  // Biểu đồ tròn custom
                   Card(
                     color: Color(0xFF16213E),
                     child: Padding(
@@ -85,7 +95,6 @@ class StatisticsPage extends StatelessWidget {
                           SizedBox(height: 20),
                           CustomPieChart(expenses: expenses, total: total),
                           SizedBox(height: 20),
-                          // Legend
                           Wrap(
                             spacing: 16,
                             runSpacing: 12,
@@ -108,9 +117,10 @@ class StatisticsPage extends StatelessWidget {
                                       width: 12,
                                       height: 12,
                                       decoration: BoxDecoration(
-                                        color: Transaction.getCategoryColor(
-                                          entry.key,
-                                        ),
+                                        color:
+                                            TransactionModel.getCategoryColor(
+                                              entry.key,
+                                            ),
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -187,15 +197,14 @@ class PieChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = math.min(size.width, size.height) / 2;
-    final innerRadius = radius * 0.55; // Tạo hình donut
+    final innerRadius = radius * 0.55;
 
-    double startAngle = -math.pi / 2; // Bắt đầu từ 12 giờ
+    double startAngle = -math.pi / 2;
 
     expenses.forEach((category, amount) {
       final sweepAngle = (amount / total) * 2 * math.pi;
-      final color = Transaction.getCategoryColor(category);
+      final color = TransactionModel.getCategoryColor(category);
 
-      // Vẽ phần outer
       final paint = Paint()
         ..color = color
         ..style = PaintingStyle.fill;
@@ -208,10 +217,8 @@ class PieChartPainter extends CustomPainter {
         paint,
       );
 
-      // Vẽ text phần trăm
       final percentage = (amount / total * 100);
       if (percentage > 5) {
-        // Chỉ hiển thị nếu > 5%
         final middleAngle = startAngle + sweepAngle / 2;
         final textRadius = radius * 0.75;
         final textX = center.dx + textRadius * math.cos(middleAngle);
@@ -246,14 +253,12 @@ class PieChartPainter extends CustomPainter {
       startAngle += sweepAngle;
     });
 
-    // Vẽ phần inner (tạo donut hole)
     final innerPaint = Paint()
       ..color = Color(0xFF16213E)
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(center, innerRadius, innerPaint);
 
-    // Vẽ icon ở giữa
     final iconPainter = TextPainter(
       text: TextSpan(text: '💰', style: TextStyle(fontSize: 40)),
       textDirection: TextDirection.ltr,
