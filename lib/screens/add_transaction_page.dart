@@ -185,7 +185,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
                   style: TextStyle(color: Colors.grey),
                 ),
-                trailing: Icon(Icons.calendar_today, color: Color(0xFFE94560)),
+                trailing: Icon(
+                  Icons.calendar_today,
+                  color: Color.fromARGB(255, 237, 201, 207),
+                ),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -231,7 +234,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     : Text('Thêm giao dịch', style: TextStyle(fontSize: 18)),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE94560),
+                backgroundColor: Color.fromARGB(255, 69, 233, 69),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
