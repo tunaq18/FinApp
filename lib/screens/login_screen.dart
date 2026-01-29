@@ -90,7 +90,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: 'Email',
                   labelStyle: TextStyle(color: Colors.grey),
-                  prefixIcon: Icon(Icons.email, color: Color(0xFFE94560)),
+                  prefixIcon: Icon(
+                    Icons.email,
+                    color: Color.fromARGB(255, 242, 224, 227),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -112,7 +115,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: 'Mật khẩu',
                   labelStyle: TextStyle(color: Colors.grey),
-                  prefixIcon: Icon(Icons.lock, color: Color(0xFFE94560)),
+                  prefixIcon: Icon(
+                    Icons.lock,
+                    color: Color.fromARGB(255, 242, 224, 227),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
